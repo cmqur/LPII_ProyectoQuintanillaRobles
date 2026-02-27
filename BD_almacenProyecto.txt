@@ -1,0 +1,269 @@
+
+DROP DATABASE IF EXISTS BD_almacenProyecto;
+CREATE DATABASE BD_almacenProyecto ;
+USE BD_almacenProyecto;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP VIEW IF EXISTS vista_reporte_kardex;
+DROP VIEW IF EXISTS vista_reporte_stock_minimo;
+DROP VIEW IF EXISTS vista_reporte_stock_almacen;
+DROP VIEW IF EXISTS vista_reporte_inventario;
+
+DROP TABLE IF EXISTS detalle_movimiento;
+DROP TABLE IF EXISTS movimiento;
+DROP TABLE IF EXISTS stock_almacen;
+DROP TABLE IF EXISTS producto;
+DROP TABLE IF EXISTS categorias;
+DROP TABLE IF EXISTS usuario;
+DROP TABLE IF EXISTS rol;
+DROP TABLE IF EXISTS almacen;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+CREATE TABLE categorias(
+  idcate       VARCHAR(10) PRIMARY KEY,
+  descripcion  VARCHAR(80) NOT NULL
+) ;
+
+CREATE TABLE rol(
+  idrol INT AUTO_INCREMENT PRIMARY KEY,
+  descripcion VARCHAR(100) NOT NULL
+) ;
+
+CREATE TABLE usuario(
+  idusuario BIGINT AUTO_INCREMENT PRIMARY KEY,
+  nombres   VARCHAR(100) NOT NULL,
+  apellidos VARCHAR(100) NOT NULL,
+  usuario   VARCHAR(50)  NOT NULL,
+  clave     VARCHAR(120) NOT NULL,
+  idrol     INT NOT NULL,
+  UNIQUE KEY uk_usuario_usuario (usuario),
+  CONSTRAINT fk_usuario_rol FOREIGN KEY (idrol) REFERENCES rol(idrol)
+) ;
+
+CREATE TABLE producto(
+  idproducto    INT AUTO_INCREMENT PRIMARY KEY,
+  codigo        VARCHAR(50) NOT NULL,
+  descripcion   VARCHAR(120) NOT NULL,
+  precio_compra DECIMAL(10,2),
+  precio_venta  DECIMAL(10,2),
+  stock         INT NOT NULL DEFAULT 0,
+  stock_minimo  INT NOT NULL DEFAULT 5,
+  idcate        VARCHAR(10),
+  UNIQUE KEY uk_producto_codigo (codigo),
+  CONSTRAINT fk_producto_categoria FOREIGN KEY (idcate) REFERENCES categorias(idcate)
+) ;
+
+CREATE TABLE almacen(
+  idalmacen INT AUTO_INCREMENT PRIMARY KEY,
+  codigo    VARCHAR(20) NOT NULL,
+  nombre    VARCHAR(80) NOT NULL,
+  direccion VARCHAR(120),
+  activo    TINYINT(1) NOT NULL DEFAULT 1,
+  UNIQUE KEY uk_almacen_codigo (codigo)
+) ;
+
+CREATE TABLE stock_almacen(
+  idstock   INT AUTO_INCREMENT PRIMARY KEY,
+  idproducto INT NOT NULL,
+  idalmacen  INT NOT NULL,
+  cantidad   INT NOT NULL DEFAULT 0,
+  UNIQUE KEY uk_stock_producto_almacen (idproducto, idalmacen),
+  CONSTRAINT fk_stock_producto FOREIGN KEY (idproducto) REFERENCES producto(idproducto),
+  CONSTRAINT fk_stock_almacen  FOREIGN KEY (idalmacen)  REFERENCES almacen(idalmacen)
+) ;
+
+CREATE TABLE movimiento(
+  idmovimiento INT AUTO_INCREMENT PRIMARY KEY,
+  fecha        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  tipo         VARCHAR(20) NOT NULL, -- INGRESO | SALIDA | TRANSFERENCIA
+  idalmacen_origen  INT NULL,
+  idalmacen_destino INT NULL,
+  idusuario    BIGINT NULL,
+  observacion  VARCHAR(200),
+  total_items  INT NOT NULL DEFAULT 0,
+  KEY idx_mov_fecha (fecha),
+  KEY idx_mov_tipo (tipo),
+  CONSTRAINT fk_mov_origen  FOREIGN KEY (idalmacen_origen)  REFERENCES almacen(idalmacen) ON DELETE SET NULL,
+  CONSTRAINT fk_mov_destino FOREIGN KEY (idalmacen_destino) REFERENCES almacen(idalmacen) ON DELETE SET NULL,
+  CONSTRAINT fk_mov_usuario FOREIGN KEY (idusuario)        REFERENCES usuario(idusuario) ON DELETE SET NULL
+) ;
+
+CREATE TABLE detalle_movimiento(
+  idmovimiento INT NOT NULL,
+  idproducto   INT NOT NULL,
+  cantidad     INT NOT NULL,
+  PRIMARY KEY (idmovimiento, idproducto),
+  CONSTRAINT fk_det_mov  FOREIGN KEY (idmovimiento) REFERENCES movimiento(idmovimiento) ON DELETE CASCADE,
+  CONSTRAINT fk_det_prod FOREIGN KEY (idproducto)   REFERENCES producto(idproducto)
+) ;
+
+
+
+CREATE VIEW vista_reporte_inventario AS
+SELECT
+  p.idproducto        AS id_producto,
+  p.codigo            AS codigo,
+  p.descripcion       AS nombre_producto,
+  COALESCE(SUM(sa.cantidad), 0) AS stock_total,
+  p.stock_minimo      AS stock_minimo,
+  c.descripcion       AS nombre_categoria
+FROM producto p
+LEFT JOIN stock_almacen sa ON sa.idproducto = p.idproducto
+LEFT JOIN categorias c ON c.idcate = p.idcate
+GROUP BY p.idproducto, p.codigo, p.descripcion, p.stock_minimo, c.descripcion;
+
+CREATE VIEW vista_reporte_stock_almacen AS
+SELECT
+  a.idalmacen     AS id_almacen,
+  a.codigo        AS codigo_almacen,
+  a.nombre        AS nombre_almacen,
+  p.idproducto    AS id_producto,
+  p.codigo        AS codigo_producto,
+  p.descripcion   AS nombre_producto,
+  sa.cantidad     AS stock,
+  p.stock_minimo  AS stock_minimo,
+  c.descripcion   AS nombre_categoria
+FROM stock_almacen sa
+JOIN almacen a   ON a.idalmacen = sa.idalmacen
+JOIN producto p  ON p.idproducto = sa.idproducto
+LEFT JOIN categorias c ON c.idcate = p.idcate;
+
+CREATE VIEW vista_reporte_stock_minimo AS
+SELECT *
+FROM vista_reporte_stock_almacen
+WHERE stock < stock_minimo;
+
+CREATE VIEW vista_reporte_kardex AS
+SELECT
+  m.idmovimiento AS id_movimiento,
+  m.fecha        AS fecha,
+  m.tipo         AS tipo,
+  d.idproducto   AS id_producto,
+  p.codigo       AS codigo_producto,
+  p.descripcion  AS nombre_producto,
+  a.idalmacen    AS id_almacen,
+  a.codigo       AS codigo_almacen,
+  a.nombre       AS nombre_almacen,
+  d.cantidad     AS entrada,
+  0             AS salida,
+  m.observacion  AS observacion
+FROM movimiento m
+JOIN detalle_movimiento d ON d.idmovimiento = m.idmovimiento
+JOIN producto p ON p.idproducto = d.idproducto
+JOIN almacen a  ON a.idalmacen = m.idalmacen_destino
+WHERE m.tipo = 'INGRESO'
+
+UNION ALL
+SELECT
+  m.idmovimiento AS id_movimiento,
+  m.fecha        AS fecha,
+  m.tipo         AS tipo,
+  d.idproducto   AS id_producto,
+  p.codigo       AS codigo_producto,
+  p.descripcion  AS nombre_producto,
+  a.idalmacen    AS id_almacen,
+  a.codigo       AS codigo_almacen,
+  a.nombre       AS nombre_almacen,
+  0             AS entrada,
+  d.cantidad     AS salida,
+  m.observacion  AS observacion
+FROM movimiento m
+JOIN detalle_movimiento d ON d.idmovimiento = m.idmovimiento
+JOIN producto p ON p.idproducto = d.idproducto
+JOIN almacen a  ON a.idalmacen = m.idalmacen_origen
+WHERE m.tipo = 'SALIDA'
+
+UNION ALL
+
+SELECT
+  m.idmovimiento AS id_movimiento,
+  m.fecha        AS fecha,
+  m.tipo         AS tipo,
+  d.idproducto   AS id_producto,
+  p.codigo       AS codigo_producto,
+  p.descripcion  AS nombre_producto,
+  a.idalmacen    AS id_almacen,
+  a.codigo       AS codigo_almacen,
+  a.nombre       AS nombre_almacen,
+  0             AS entrada,
+  d.cantidad     AS salida,
+  m.observacion  AS observacion
+FROM movimiento m
+JOIN detalle_movimiento d ON d.idmovimiento = m.idmovimiento
+JOIN producto p ON p.idproducto = d.idproducto
+JOIN almacen a  ON a.idalmacen = m.idalmacen_origen
+WHERE m.tipo = 'TRANSFERENCIA'
+
+UNION ALL
+
+SELECT
+  m.idmovimiento AS id_movimiento,
+  m.fecha        AS fecha,
+  m.tipo         AS tipo,
+  d.idproducto   AS id_producto,
+  p.codigo       AS codigo_producto,
+  p.descripcion  AS nombre_producto,
+  a.idalmacen    AS id_almacen,
+  a.codigo       AS codigo_almacen,
+  a.nombre       AS nombre_almacen,
+  d.cantidad     AS entrada,
+  0             AS salida,
+  m.observacion  AS observacion
+FROM movimiento m
+JOIN detalle_movimiento d ON d.idmovimiento = m.idmovimiento
+JOIN producto p ON p.idproducto = d.idproducto
+JOIN almacen a  ON a.idalmacen = m.idalmacen_destino
+WHERE m.tipo = 'TRANSFERENCIA';
+
+
+
+INSERT INTO categorias (idcate, descripcion) VALUES
+('HERR','Herramientas'),
+('ELEC','Electricos'),
+('SUMI','Suministros');
+
+INSERT INTO rol (idrol, descripcion) VALUES
+(1,'ADMIN'),
+(2,'OPERADOR');
+
+INSERT INTO usuario (nombres, apellidos, usuario, clave, idrol) VALUES
+('Demo','Admin','demo','demo',1),
+('Operador','Almacen','operador','operador',2);
+
+INSERT INTO almacen (codigo, nombre, direccion, activo) VALUES
+('ALM-01','Almacen Central','Av. Principal 123',1),
+('ALM-02','Almacen Tienda','Jr. Secundario 456',1);
+
+INSERT INTO producto (codigo, descripcion, precio_compra, precio_venta, stock, stock_minimo, idcate) VALUES
+('P001','Martillo 16oz',15.00,25.00,30,5,'HERR'),
+('P002','Taladro inalambrico',120.00,180.00,10,3,'ELEC'),
+('P003','Cinta aislante',1.50,3.50,4,5,'SUMI');
+
+INSERT INTO stock_almacen (idproducto, idalmacen, cantidad) VALUES
+(1,1,20),
+(1,2,10),
+(2,1,10),
+(3,2,4);
+
+INSERT INTO movimiento (fecha, tipo, idalmacen_origen, idalmacen_destino, idusuario, observacion, total_items)
+VALUES (NOW(), 'INGRESO', NULL, 1, 1, 'Stock inicial - Central', 2);
+SET @mov1 := LAST_INSERT_ID();
+INSERT INTO detalle_movimiento (idmovimiento, idproducto, cantidad) VALUES
+(@mov1, 1, 20),
+(@mov1, 2, 10);
+
+INSERT INTO movimiento (fecha, tipo, idalmacen_origen, idalmacen_destino, idusuario, observacion, total_items)
+VALUES (NOW(), 'INGRESO', NULL, 2, 1, 'Stock inicial - Tienda', 2);
+SET @mov2 := LAST_INSERT_ID();
+INSERT INTO detalle_movimiento (idmovimiento, idproducto, cantidad) VALUES
+(@mov2, 1, 10),
+(@mov2, 3, 4);
+
+INSERT INTO movimiento (fecha, tipo, idalmacen_origen, idalmacen_destino, idusuario, observacion, total_items)
+VALUES (NOW(), 'TRANSFERENCIA', 1, 2, 1, 'Transferencia demo', 1);
+SET @mov3 := LAST_INSERT_ID();
+INSERT INTO detalle_movimiento (idmovimiento, idproducto, cantidad) VALUES
+(@mov3, 1, 2);
+

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Nuevo almacén')"></head>
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container py-4">
+    <div class="mb-3">
+        <h3 class="page-title mb-1">Nuevo almacén</h3>
+        <div class="text-secondary">Registra un almacén para movimientos</div>
+    </div>
+
+    <div class="card shadow-soft">
+        <div class="card-body">
+            <form th:action="@{/almacen}" th:object="${almacen}" method="post" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Código</label>
+                    <input class="form-control" th:field="*{codigo}" placeholder="ALM-PRIN" required>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label">Nombre</label>
+                    <input class="form-control" th:field="*{nombre}" placeholder="Almacén Principal" required>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Dirección</label>
+                    <input class="form-control" th:field="*{direccion}" placeholder="Sede Central">
+                </div>
+                <div class="col-12 d-flex gap-2">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-check2-circle me-1"></i>Guardar
+                    </button>
+                    <a class="btn btn-outline-secondary" th:href="@{/almacen}">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="fragments/scripts :: scripts"></th:block>
+</body>
+</html>

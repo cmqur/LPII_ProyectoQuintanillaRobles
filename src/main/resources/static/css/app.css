@@ -1,0 +1,27 @@
+:root{
+  --card-radius: 1rem;
+}
+
+body{
+  background: #f6f7fb;
+}
+
+.card{
+  border-radius: var(--card-radius);
+}
+
+.table thead th{
+  white-space: nowrap;
+}
+
+.badge{
+  font-weight: 600;
+}
+
+.page-title{
+  letter-spacing: .2px;
+}
+
+.shadow-soft{
+  box-shadow: 0 8px 24px rgba(0,0,0,.08);
+}

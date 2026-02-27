@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Movimientos')"></head>
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h3 class="page-title mb-1">Movimientos</h3>
+      <div class="text-secondary">Historial de ingresos, salidas y transferencias</div>
+    </div>
+    <a class="btn btn-primary" th:href="@{/movimiento/new}">
+      <i class="bi bi-plus-circle me-1"></i>Nuevo movimiento
+    </a>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12">
+      <div class="card shadow-soft">
+        <div class="card-body">
+          <div class="d-flex flex-column flex-md-row gap-2 align-items-md-center justify-content-between mb-3">
+            <div class="input-group" style="max-width: 420px;">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input class="form-control" id="tableFilter" type="text" placeholder="Buscar en movimientos…" data-table-filter-target="#tablaMovimientos">
+            </div>
+            <div class="d-flex gap-2">
+              <a class="btn btn-outline-dark btn-sm" th:href="@{/reportes/kardex(modo='ver')}" target="_blank">
+                <i class="bi bi-journals me-1"></i>Ver Kardex
+              </a>
+              <a class="btn btn-outline-dark btn-sm" th:href="@{/reportes/kardex(modo='descargar')}">
+                <i class="bi bi-download me-1"></i>Descargar Kardex
+              </a>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle" id="tablaMovimientos">
+              <thead>
+              <tr>
+                <th>#</th>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Origen</th>
+                <th>Destino</th>
+                <th>Usuario</th>
+                <th>Items</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="m : ${movimientos}">
+                <td th:text="${m.id}"></td>
+                <td th:text="${#dates.format(m.fecha,'dd/MM/yyyy HH:mm')}"></td>
+                <td>
+                  <span th:if="${m.tipo.name() == 'INGRESO'}" class="badge text-bg-success">Ingreso</span>
+                  <span th:if="${m.tipo.name() == 'SALIDA'}" class="badge text-bg-danger">Salida</span>
+                  <span th:if="${m.tipo.name() == 'TRANSFERENCIA'}" class="badge text-bg-primary">Transferencia</span>
+                </td>
+                <td th:text="${m.almacenOrigen != null ? m.almacenOrigen.nombre : '-'}"></td>
+                <td th:text="${m.almacenDestino != null ? m.almacenDestino.nombre : '-'}"></td>
+                <td th:text="${m.usuario != null ? m.usuario.nombres : '-'}"></td>
+                <td>
+                  <span class="badge text-bg-light border" th:text="${m.totalItems}"></span>
+                </td>
+                <td class="text-end">
+                  <a class="btn btn-sm btn-outline-primary" th:href="@{/movimiento/ver/{id}(id=${m.id})}">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(movimientos)}">
+                <td colspan="8" class="text-center text-secondary py-4">No hay movimientos registrados.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<th:block th:replace="fragments/scripts :: scripts"></th:block>
+</body>
+</html>

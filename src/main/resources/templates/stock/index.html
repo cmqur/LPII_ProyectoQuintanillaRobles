@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Stock por almacén')"></head>
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h3 class="page-title mb-1">Stock por almacén</h3>
+      <div class="text-secondary">Consulta rápida del stock por ubicación</div>
+    </div>
+    <a class="btn btn-outline-dark" th:href="@{/movimiento/new}">
+      <i class="bi bi-arrow-left-right me-1"></i>Registrar movimiento
+    </a>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-4">
+      <div class="card shadow-soft">
+        <div class="card-body">
+          <h6 class="mb-2">Filtrar</h6>
+          <form method="get" th:action="@{/stock}">
+            <label class="form-label">Almacén</label>
+            <select class="form-select" name="almacenId" onchange="this.form.submit()">
+              <option value="" th:selected="${almacenId == null}">Todos</option>
+              <option th:each="a : ${almacenList}" th:value="${a.id}" th:text="${a.nombre}" th:selected="${almacenId != null && almacenId == a.id}"></option>
+            </select>
+          </form>
+
+          <hr>
+          <div class="small text-secondary">
+            Tip: si no ves stock de un producto en un almacén, registra un <b>Ingreso</b> o <b>Transferencia</b> para que se cree el registro.
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-soft mt-3">
+        <div class="card-body">
+          <h6 class="mb-2">Accesos</h6>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-dark btn-sm" th:href="@{/producto}"><i class="bi bi-tags me-1"></i>Productos</a>
+            <a class="btn btn-outline-dark btn-sm" th:href="@{/almacen}"><i class="bi bi-building me-1"></i>Almacenes</a>
+            <a class="btn btn-outline-dark btn-sm" th:href="@{/reportes/inventario(modo='ver')}" target="_blank"><i class="bi bi-file-earmark-pdf me-1"></i>Inventario</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-soft">
+        <div class="card-body">
+          <div class="d-flex flex-column flex-lg-row gap-2 align-items-lg-center justify-content-between mb-3">
+            <div>
+              <h5 class="mb-0">Listado</h5>
+              <div class="text-secondary small" th:if="${almacenSel != null}">
+                Almacén seleccionado: <b th:text="${almacenSel.nombre}"></b>
+              </div>
+            </div>
+            <div class="input-group" style="max-width: 420px;">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input class="form-control" type="text" placeholder="Buscar por almacén, código o producto…" data-table-filter-target="#tablaStock">
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle" id="tablaStock">
+              <thead>
+              <tr>
+                <th>Almacén</th>
+                <th>Código</th>
+                <th>Producto</th>
+                <th class="text-end">Cantidad</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="s : ${stockList}">
+                <td>
+                  <div class="fw-semibold" th:text="${s.almacen.nombre}"></div>
+                  <div class="small text-secondary" th:text="${s.almacen.codigo}"></div>
+                </td>
+                <td class="fw-semibold" th:text="${s.producto.codigo}"></td>
+                <td th:text="${s.producto.descripcion}"></td>
+                <td class="text-end">
+                  <span class="badge text-bg-success" th:if="${s.cantidad > 0}" th:text="${s.cantidad}"></span>
+                  <span class="badge text-bg-secondary" th:if="${s.cantidad == 0}" th:text="${s.cantidad}"></span>
+                </td>
+              </tr>
+              <tr th:if="${stockList == null || #lists.isEmpty(stockList)}">
+                <td colspan="4" class="text-center text-secondary py-4">No hay registros de stock para mostrar.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<th:block th:replace="fragments/scripts :: scripts"></th:block>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Dashboard - Almacén & Movimientos')"></head>
+<body>
+
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h3 class="page-title mb-1">Dashboard</h3>
+            <div class="text-secondary">Resumen rápido del sistema</div>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-primary" th:href="@{/movimiento/new}">
+                <i class="bi bi-plus-circle me-1"></i>Nuevo movimiento
+            </a>
+            <a class="btn btn-outline-primary" th:href="@{/producto/new}">
+                <i class="bi bi-tag me-1"></i>Nuevo producto
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card shadow-soft">
+                <div class="card-body">
+                    <div class="text-secondary small">Productos</div>
+                    <div class="fs-2 fw-bold" th:text="${totalProductos}">0</div>
+                    <a class="small" th:href="@{/producto}">Ver listado</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card shadow-soft">
+                <div class="card-body">
+                    <div class="text-secondary small">Almacenes</div>
+                    <div class="fs-2 fw-bold" th:text="${totalAlmacenes}">0</div>
+                    <a class="small" th:href="@{/almacen}">Administrar</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card shadow-soft">
+                <div class="card-body">
+                    <div class="text-secondary small">Movimientos</div>
+                    <div class="fs-2 fw-bold" th:text="${totalMovimientos}">0</div>
+                    <a class="small" th:href="@{/movimiento}">Ver historial</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card shadow-soft">
+                <div class="card-body">
+                    <div class="text-secondary small">Usuarios</div>
+                    <div class="fs-2 fw-bold" th:text="${totalUsuarios}">0</div>
+                    <a class="small" th:href="@{/usuario}">Ver usuarios</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+        <div class="col-12 col-lg-7">
+            <div class="card shadow-soft">
+                <div class="card-body">
+                    <h5 class="mb-3">Accesos rápidos</h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-outline-dark" th:href="@{/movimiento/new}"><i class="bi bi-arrow-left-right me-1"></i>Registrar movimiento</a>
+                        <a class="btn btn-outline-dark" th:href="@{/stock}"><i class="bi bi-stack me-1"></i>Stock por almacén</a>
+                        <a class="btn btn-outline-dark" th:href="@{/almacen/new}"><i class="bi bi-building-add me-1"></i>Nuevo almacén</a>
+                        <a class="btn btn-outline-dark" th:href="@{/usuario/new}"><i class="bi bi-person-add me-1"></i>Nuevo usuario</a>
+                        <a class="btn btn-outline-warning" th:href="@{/reportes/stockminimo(modo='ver')}" target="_blank"><i class="bi bi-exclamation-triangle me-1"></i>Stock mínimo</a>
+                        <a class="btn btn-outline-dark" th:href="@{/reportes/kardex(modo='ver')}" target="_blank"><i class="bi bi-journals me-1"></i>Kardex</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-5">
+            <div class="card shadow-soft">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="mb-2">Alertas</h5>
+                        <span class="badge text-bg-warning" th:text="${alertasStock}">0</span>
+                    </div>
+                    <div class="text-secondary">
+                        Productos con stock igual o menor al mínimo configurado.
+                    </div>
+                    <div class="mt-3">
+                        <a class="btn btn-sm btn-warning" th:href="@{/reportes/stockminimo(modo='ver')}" target="_blank">
+                            Ver reporte
+                        </a>
+                    </div>
+                    <hr>
+                    <h6 class="mb-2">Tips de uso</h6>
+                    <ul class="text-secondary mb-0">
+                        <li>Usa <b>Ingreso</b> para incrementar stock.</li>
+                        <li>Usa <b>Salida</b> para registrar despachos.</li>
+                        <li>Usa <b>Transferencia</b> para mover stock entre almacenes.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<th:block th:replace="fragments/scripts :: scripts"></th:block>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Detalle de Movimiento')"></head>
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h3 class="page-title mb-1">Detalle de movimiento</h3>
+      <div class="text-secondary">Información general + productos movidos</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-dark" th:href="@{/movimiento}"><i class="bi bi-arrow-left me-1"></i>Volver</a>
+      <a class="btn btn-outline-primary" th:href="@{/reportes/kardex(modo='ver')}" target="_blank"><i class="bi bi-journals me-1"></i>Kardex</a>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-4">
+      <div class="card shadow-soft">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="text-secondary">Movimiento</div>
+            <span class="badge text-bg-light border" th:text="${movimiento.id}"></span>
+          </div>
+          <hr>
+          <div class="mb-2"><span class="text-secondary">Fecha:</span> <b th:text="${#dates.format(movimiento.fecha,'dd/MM/yyyy HH:mm')}"></b></div>
+          <div class="mb-2"><span class="text-secondary">Tipo:</span>
+            <span th:if="${movimiento.tipo.name() == 'INGRESO'}" class="badge text-bg-success">Ingreso</span>
+            <span th:if="${movimiento.tipo.name() == 'SALIDA'}" class="badge text-bg-danger">Salida</span>
+            <span th:if="${movimiento.tipo.name() == 'TRANSFERENCIA'}" class="badge text-bg-primary">Transferencia</span>
+          </div>
+          <div class="mb-2"><span class="text-secondary">Origen:</span> <b th:text="${movimiento.almacenOrigen != null ? movimiento.almacenOrigen.nombre : '-'}"></b></div>
+          <div class="mb-2"><span class="text-secondary">Destino:</span> <b th:text="${movimiento.almacenDestino != null ? movimiento.almacenDestino.nombre : '-'}"></b></div>
+          <div class="mb-2"><span class="text-secondary">Usuario:</span> <b th:text="${movimiento.usuario != null ? movimiento.usuario.nombres : '-'}"></b></div>
+          <div class="mb-2"><span class="text-secondary">Observación:</span>
+            <div class="small" th:text="${movimiento.observacion != null ? movimiento.observacion : '—'}"></div>
+          </div>
+          <div class="mt-3 text-secondary small">Items: <b th:text="${movimiento.totalItems}"></b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-soft">
+        <div class="card-body">
+          <h5 class="mb-3">Productos</h5>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Código</th>
+                <th class="text-end">Cantidad</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="d : ${detalles}">
+                <td>
+                  <div class="fw-semibold" th:text="${d.id.producto.descripcion}"></div>
+                  <div class="small text-secondary">Categoría: <span th:text="${d.id.producto.categoria != null ? d.id.producto.categoria.descripcion : '-'}"></span></div>
+                </td>
+                <td th:text="${d.id.producto.codigo}"></td>
+                <td class="text-end"><span class="badge text-bg-primary" th:text="${d.cantidad}"></span></td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(detalles)}">
+                <td colspan="3" class="text-center text-secondary py-4">No hay detalle registrado.</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<th:block th:replace="fragments/scripts :: scripts"></th:block>
+</body>
+</html>

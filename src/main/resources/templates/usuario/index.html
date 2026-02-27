@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Usuarios')"></head>
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h3 class="page-title mb-1">Usuarios</h3>
+      <div class="text-secondary">Mantenedor de usuarios y roles</div>
+    </div>
+    <a class="btn btn-primary" th:href="@{/usuario/new}"><i class="bi bi-plus-circle me-1"></i>Nuevo usuario</a>
+  </div>
+
+  <div class="card shadow-soft">
+    <div class="card-body">
+      <div class="input-group mb-3" style="max-width: 420px;">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input class="form-control" type="text" placeholder="Buscar usuario…" data-table-filter-target="#tablaUsuarios">
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle" id="tablaUsuarios">
+          <thead>
+          <tr>
+            <th>Nombres</th>
+            <th>Apellidos</th>
+            <th>Usuario</th>
+            <th>Rol</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="u : ${usuarios}">
+            <td th:text="${u.nombres}"></td>
+            <td th:text="${u.apellidos}"></td>
+            <td class="fw-semibold" th:text="${u.username}"></td>
+            <td>
+              <span class="badge text-bg-light border" th:text="${u.rol != null ? u.rol.descripcion : '-'}"></span>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(usuarios)}">
+            <td colspan="4" class="text-center text-secondary py-4">No hay usuarios registrados.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="small text-secondary">Nota: en un sistema real, la clave no debería mostrarse en pantalla ni guardarse sin hash.</div>
+    </div>
+  </div>
+</div>
+
+<th:block th:replace="fragments/scripts :: scripts"></th:block>
+</body>
+</html>

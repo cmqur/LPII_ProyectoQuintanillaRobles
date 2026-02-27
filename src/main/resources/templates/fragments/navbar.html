@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-semibold" th:href="@{/dashboard}">
+            <i class="bi bi-box-seam me-2"></i>Almacén & Movimientos
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" th:href="@{/dashboard}"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/producto}"><i class="bi bi-tags me-1"></i>Productos</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/almacen}"><i class="bi bi-building me-1"></i>Almacenes</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/movimiento}"><i class="bi bi-arrow-left-right me-1"></i>Movimientos</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/stock}"><i class="bi bi-stack me-1"></i>Stock por almacén</a></li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-file-earmark-pdf me-1"></i>Reportes
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" th:href="@{/reportes/inventario(modo='ver')}">Inventario (Stock)</a></li>
+                        <li><a class="dropdown-item" th:href="@{/reportes/stockalmacen(modo='ver')}">Stock por almacén</a></li>
+                        <li><a class="dropdown-item" th:href="@{/reportes/kardex(modo='ver')}">Kardex Movimientos</a></li>
+                        <li><a class="dropdown-item" th:href="@{/reportes/stockminimo(modo='ver')}">Stock Mínimo</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item"><a class="nav-link" th:href="@{/usuario}"><i class="bi bi-person-badge me-1"></i>Usuarios</a></li>
+            </ul>
+
+            <a class="btn btn-outline-light btn-sm" th:href="@{/}">
+                <i class="bi bi-box-arrow-right me-1"></i>Salir
+            </a>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

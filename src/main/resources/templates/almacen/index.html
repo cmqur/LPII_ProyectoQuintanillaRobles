@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Almacenes')"></head>
+<body>
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h3 class="page-title mb-1">Almacenes</h3>
+            <div class="text-secondary">Mantenedor de almacenes</div>
+        </div>
+        <a class="btn btn-primary" th:href="@{/almacen/new}">
+            <i class="bi bi-plus-circle me-1"></i>Nuevo almacén
+        </a>
+    </div>
+
+    <div class="card shadow-soft">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Dirección</th>
+                        <th>Activo</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="a : ${almacenes}">
+                        <td th:text="${a.codigo}"></td>
+                        <td th:text="${a.nombre}"></td>
+                        <td th:text="${a.direccion}"></td>
+                        <td>
+                            <span th:if="${a.activo}" class="badge text-bg-success">Sí</span>
+                            <span th:if="${!a.activo}" class="badge text-bg-secondary">No</span>
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" th:href="@{/almacen/edit/{id}(id=${a.id})}">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a class="btn btn-sm btn-outline-danger" th:href="@{/almacen/{id}(id=${a.id})}"
+                               onclick="return confirm('¿Eliminar almacén?');">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(almacenes)}">
+                        <td colspan="5" class="text-center text-secondary py-4">No hay almacenes registrados.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="fragments/scripts :: scripts"></th:block>
+</body>
+</html>
