@@ -42,7 +42,7 @@ public class MovimientoServiceImpl implements MovimientoService {
             movimiento.setFecha(new Date());
         }
 
-        // Validaciones mínimas por tipo
+       
         if (movimiento.getTipo() == null) {
             throw new IllegalArgumentException("Debe seleccionar un tipo de movimiento");
         }
@@ -72,11 +72,11 @@ public class MovimientoServiceImpl implements MovimientoService {
 
             int qty = det.getCantidad();
 
-            // Ajuste de stock según tipo
+           
             if (movimiento.getTipo() == MovimientoTipo.INGRESO) {
                 Almacen destino = movimiento.getAlmacenDestino();
                 stockAlmacenService.ajustarStock(p, destino, qty);
-                // mantenemos compatibilidad con el stock global
+                
                 p.setStock(p.getStock() + qty);
                 productoService.guardarProducto(p);
             } else if (movimiento.getTipo() == MovimientoTipo.TRANSFERENCIA) {
@@ -84,9 +84,9 @@ public class MovimientoServiceImpl implements MovimientoService {
                 Almacen destino = movimiento.getAlmacenDestino();
                 stockAlmacenService.ajustarStock(p, origen, -qty);
                 stockAlmacenService.ajustarStock(p, destino, qty);
-                // stock global no cambia
+              
             } else if (movimiento.getTipo() == MovimientoTipo.SALIDA) {
-                // Para SALIDA, el ejemplo ya lo hace con Venta. Si alguien lo usa aquí, restamos global y del almacén origen (si existe).
+               
                 if (movimiento.getAlmacenOrigen() != null) {
                     stockAlmacenService.ajustarStock(p, movimiento.getAlmacenOrigen(), -qty);
                 }
@@ -94,7 +94,7 @@ public class MovimientoServiceImpl implements MovimientoService {
                 productoService.guardarProducto(p);
             }
 
-            // Guardamos detalle con PK compuesta correcta (movGuardado + producto)
+        
             DetalleMovimientoId id = new DetalleMovimientoId(movGuardado, p);
             det.setId(id);
             detalleMovimientoService.guardar(det);
