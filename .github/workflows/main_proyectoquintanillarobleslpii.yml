@@ -59,6 +59,7 @@ jobs:
         with:
           app-name: 'ProyectoQuintanillaRoblesLpII'
           slot-name: 'Production'
-          package: '*.jar'
+          package: '*.war'
 
           
+
